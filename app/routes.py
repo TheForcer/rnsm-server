@@ -2,9 +2,9 @@ from flask import render_template, url_for, flash, redirect, request
 from app import app
 from app.models import Victim, load_victim
 
-
-@app.route("/")
-@app.route("/overview")
+# Show an overview of all victims currently registered in the database
+@app.route("/", methods=["GET"])
+@app.route("/overview", methods=["GET"])
 def displayIndex():
     victims = Victim.query.filter_by(archived=0).all()
     return render_template(
@@ -15,7 +15,14 @@ def displayIndex():
     )
 
 
-# @app.route("/create", methods=["GET", "POST"])
+# Show archived victims in an overview table
+@app.route("/archive")
+def displayArchive():
+    victims = Victim.query.filter_by(archived=1).order_by(Victim.victim_id.desc()).all()
+    return render_template("archive.html", title="Archiv", victims=victims)
+
+
+# @app.route("/create", methods=["POST"])
 # def displayForm():
 #     form = CastForm()
 #     if form.validate_on_submit():

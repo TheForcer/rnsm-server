@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2 class="text-center">Archiv</h2>
+<hr>
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead class="thead-dark text-center">
+            <td>Opfer ID</td>
+            <td>Erstkontakt</td>
+            <td>IP</td>
+        </thead>
+
+        {% for victim in victims %}
+        <tr class="text-center">
+            <td><b>{{victim.victim_id}}</b></td>
+            <td>{{victim.date_firstContact}}</td>
+            <td>{{victim.ip_firstContact}}</td>
+            <!-- <td><a href="/api/delete/{{cast.cast_id}}/"><button>Löschen</button></a></td> -->
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+<hr>
+{% endblock content %}
