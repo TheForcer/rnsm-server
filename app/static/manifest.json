@@ -1,0 +1,9 @@
+{
+    "name": "rnsm",
+    "short_name": "rnsm",
+    "lang": "de",
+    "start_url": "/overview",
+    "scope": "/",
+    "display": "standalone",
+    "theme_color": "#000000"
+}
