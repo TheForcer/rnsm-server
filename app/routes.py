@@ -1,5 +1,5 @@
 from flask import render_template, url_for, flash, redirect, request
-from app import app,
+from app import app
 from app.models import Victim, load_victim
 
 
