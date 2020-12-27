@@ -16,6 +16,8 @@
             <h6><b>Letzte IP:</b> {{victim.ip_firstContact}}</h6>
             <h6><b>Zahlung erfolgt:</b> {{victim.payment_received}}</h6>
             <h6><b>Schlüssel:</b> {{victim.victim_key}}</h6>
+            <a href="/paymentReceived/{{victim.victim_id}}"><button type="button"
+                    class="btn btn-success">Bezahlt!</button></a>
             <hr>
         </div>
     </div>
