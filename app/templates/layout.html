@@ -15,7 +15,7 @@
     <meta name="theme-color" content="#990033">
     <meta name="msapplication-navbutton-color" content="#990033">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="msapplication-starturl" content="{{ url_for("displayIndex") }}">
+    <meta name="msapplication-starturl" content="{{ url_for('displayIndex') }}">
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/bootstrap.min.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
@@ -37,10 +37,10 @@
         <div class="collapse navbar-collapse" id="collapsibleNavId">
             <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for("displayIndex") }}">Übersicht</a>
+                    <a class="nav-link" href="{{ url_for('displayIndex') }}">Übersicht</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for("displayArchive") }}">Archiv</a>
+                    <a class="nav-link" href="{{ url_for('displayArchive') }}">Archiv</a>
                 </li>
             </ul>
         </div>
