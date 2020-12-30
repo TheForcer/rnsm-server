@@ -1,8 +1,10 @@
 Flask
 flask_sqlalchemy
+flask_httpauth
 werkzeug
 itsdangerous
 click
 Jinja2
 MarkupSafe
+Pillow
 datetime
