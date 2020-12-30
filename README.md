@@ -1,5 +1,6 @@
 # rnsm-server
 Server part of my rnsm programming project
+The client can befound here: https://github.com/TheForcer/rnsm-client
 
 # Setup
 Make sure that you are using Python 3.8 and have pip available to install the requirements:
