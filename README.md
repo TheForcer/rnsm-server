@@ -1,5 +1,6 @@
 # rnsm-server
-Server part of my rnsm programming project
+Server part of my rnsm programming project.
+
 The client can befound here: https://github.com/TheForcer/rnsm-client
 
 # Setup
