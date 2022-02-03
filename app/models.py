@@ -14,6 +14,9 @@ class Victim(db.Model):
     date_firstContact = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     ip_firstContact = db.Column(db.Text, nullable=False)
     payment_received = db.Column(db.Boolean, nullable=False, default=0)
+    s3_bucket = db.Column(db.Text, nullable=False)
+    s3_access_key = db.Column(db.Text, nullable=False)
+    s3_secret_key = db.Column(db.Text, nullable=False)
     archived = db.Column(db.Boolean, nullable=False, default=0)
 
     def __repr__(self):
