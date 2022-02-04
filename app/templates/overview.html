@@ -6,21 +6,27 @@
 <div class="row m-2">
     {% for victim in victims %}
     <div class="card col-sm-4">
-        <div class="card-body mx-auto text-center">
-            <h5 class="card-title"><b>Opfer {{victim.victim_hostname}}</b></h5>
+        <div class="card-body mx-auto text-left">
+            <h5 class="card-title text-center"><b>Opfer {{victim.victim_hostname}}</b></h5>
             <hr>
             <p class="card-text">
             <h6><b>ID:</b> {{victim.victim_id}}</h6>
             <h6><b>Username:</b> {{victim.victim_username}}</h6>
             <h6><b>Erstkontakt:</b> {{victim.date_firstContact}}</h6>
             <h6><b>Letzte IP:</b> {{victim.ip_firstContact}}</h6>
-            <h6><b>Zahlung erfolgt:</b> {{victim.payment_received}}</h6>
-            <h6><b>Schlüssel:</b> {{victim.victim_key}}</h6>
-            <a href="/paymentReceived/{{victim.victim_id}}"><button type="button"
-                    class="btn btn-success">Bezahlt!</button></a>
-            <a href="/static/wp/{{victim.victim_id}}.png"><button type="button" class="btn btn-success">Zeige
-                    Ransomnotiz</button></a>
+            <h6><b>Sync-Status:</b> {{victim.sync_state}}</h6>
+            <div class="text-center">
+                <a href="/sync/{{victim.victim_id}}/set/0"><button type="button" class="btn btn-danger">0</button></a>
+                <a href="/sync/{{victim.victim_id}}/set/1"><button type="button" class="btn btn-danger">1</button></a>
+                <a href="/sync/{{victim.victim_id}}/set/2"><button type="button" class="btn btn-danger">2</button></a>
+                <a href="/sync/{{victim.victim_id}}/set/3"><button type="button" class="btn btn-danger">3</button></a>
+            </div>
             <hr>
+            <div class="text-center">
+                <a href="/details/{{victim.victim_id}}"><button type="button" class="btn btn-dark">Details</button></a>
+                <a href="/paymentReceived/{{victim.victim_id}}"><button type="button"
+                        class="btn btn-dark">Archiv</button></a>
+            </div>
         </div>
     </div>
     {% endfor %}

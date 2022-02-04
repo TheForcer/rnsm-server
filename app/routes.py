@@ -38,6 +38,19 @@ def displayIndex():
     )
 
 
+# Show a detailed view of a victim
+@app.route("/details/<int:victim_id>", methods=["GET"])
+@auth.login_required
+def displayDetails(victim_id):
+    victim = Victim.query.filter_by(victim_id=victim_id).first()
+    return render_template(
+        "details.html",
+        title=f"Details {victim.victim_id}",
+        victim=victim,
+        user=auth.current_user(),
+    )
+
+
 # Show archived victims in an overview table
 @app.route("/archive")
 @auth.login_required

