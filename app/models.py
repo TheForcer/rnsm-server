@@ -18,6 +18,7 @@ class Victim(db.Model):
     s3_access_key = db.Column(db.Text, nullable=False)
     s3_secret_key = db.Column(db.Text, nullable=False)
     sync_state = db.Column(db.Integer, nullable=False, default=0)
+    key_locked = db.Column(db.Boolean, nullable=False, default=0)
     archived = db.Column(db.Boolean, nullable=False, default=0)
 
     def __repr__(self):

