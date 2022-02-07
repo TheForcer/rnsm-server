@@ -18,7 +18,9 @@ Make sure that you are using Python >3.7 and have pip available to install the r
     - Enter the Minio Admin Server details at the top of the `app/routes.py` file
     - The Minio client binary needs to be available in the PATH with the name `mclient`
 
-6. Run the server with `python3 run.py`
+6. Make sure the packed & obfuscated ransom.exe/exfil.exe stages from the client are available in the respective folders in `app/static`
+
+7. Run the server with `python3 run.py`
 
 The webinterface is then reachable at http://{YOUR_IP}:5000/
 Make sure to put a proxy such as nginx/Apache2 in front of the app for TLS termination, advanced logging etc.
